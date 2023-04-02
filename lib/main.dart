@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch().copyWith(
           primary: PRIMARY_COLOR,
           secondary: SECONDARY_COLOR,
-        ), 
+        ),
         // primarySwatch: Color.fromRGBO(41, 196, 160, 1),
         textTheme: GoogleFonts.manropeTextTheme(Theme.of(context).textTheme),
       ),
@@ -85,8 +85,11 @@ class _AppWidgetState extends State<AppWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return PersistentTabView(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+        body: PersistentTabView(
       context,
+      navBarHeight: MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : kBottomNavigationBarHeight,
       screens: _buildScreens(),
       items: _navBarItems(),
       navBarStyle: NavBarStyle.style3,
@@ -102,6 +105,6 @@ class _AppWidgetState extends State<AppWidget> {
         curve: Curves.ease,
         duration: Duration(milliseconds: 350),
       ),
-    );
+    ));
   }
 }
