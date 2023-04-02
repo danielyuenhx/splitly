@@ -9,6 +9,9 @@ void main() {
   runApp(const MyApp());
 }
 
+const PRIMARY_COLOR = Color.fromRGBO(30, 148, 120, 1);
+const SECONDARY_COLOR = Color.fromRGBO(41, 196, 160, 1);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -18,8 +21,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Splitly',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: PRIMARY_COLOR,
+          secondary: SECONDARY_COLOR,
+        ), 
+        // primarySwatch: Color.fromRGBO(41, 196, 160, 1),
+        textTheme: GoogleFonts.manropeTextTheme(Theme.of(context).textTheme),
       ),
       home: const AppWidget(),
       debugShowCheckedModeBanner: false,
@@ -36,7 +43,7 @@ class AppWidget extends StatefulWidget {
 
 class _AppWidgetState extends State<AppWidget> {
   int currentIndex = 0;
-  PersistentTabController _controller =
+  final PersistentTabController _controller =
       PersistentTabController(initialIndex: 0);
 
   void _changePage(int index) {
@@ -46,30 +53,55 @@ class _AppWidgetState extends State<AppWidget> {
   }
 
   List<Widget> _buildScreens() {
-      return [
-        HomeScreen(),
-        HomeScreen(),
-      ];
+    return [
+      HomeScreen(),
+      HomeScreen(),
+      HomeScreen(),
+    ];
+  }
+
+  List<PersistentBottomNavBarItem> _navBarItems() {
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.add),
+        title: ("Add"),
+        activeColorPrimary: PRIMARY_COLOR,
+        inactiveColorPrimary: Colors.grey.shade500,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.backup_table),
+        title: ("Presets"),
+        activeColorPrimary: PRIMARY_COLOR,
+        inactiveColorPrimary: Colors.grey.shade500,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.history),
+        title: ("History"),
+        activeColorPrimary: PRIMARY_COLOR,
+        inactiveColorPrimary: Colors.grey.shade500,
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return PersistentTabView(context, screens: [
-      HomeScreen(),
-      HomeScreen()
-    ], items: [
-      PersistentBottomNavBarItem(
-        icon: Icon(Icons.home),
-        title: ("Home"),
-        activeColorPrimary: Colors.blue,
-        inactiveColorPrimary: Colors.grey,
+    return PersistentTabView(
+      context,
+      screens: _buildScreens(),
+      items: _navBarItems(),
+      navBarStyle: NavBarStyle.style3,
+      popActionScreens: PopActionScreensType.all,
+      itemAnimationProperties: const ItemAnimationProperties(
+        // Navigation Bar's items animation properties.
+        duration: Duration(milliseconds: 200),
+        curve: Curves.ease,
       ),
-      PersistentBottomNavBarItem(
-        icon: Icon(Icons.home),
-        title: ("Home"),
-        activeColorPrimary: Colors.blue,
-        inactiveColorPrimary: Colors.grey,
+      screenTransitionAnimation: const ScreenTransitionAnimation(
+        // Screen transition animation on change of selected tab.
+        animateTabTransition: true,
+        curve: Curves.ease,
+        duration: Duration(milliseconds: 350),
       ),
-    ]);
+    );
   }
 }
