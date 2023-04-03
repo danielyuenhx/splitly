@@ -22,8 +22,12 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController costController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
 
+  double costSum = 0;
+
   TextEditingController payeeNameController = TextEditingController();
   TextEditingController paidController = TextEditingController();
+
+  double paidSum = 0;
 
   @override
   void dispose() {
@@ -84,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Container(
           child: Padding(
         padding: const EdgeInsets.only(
-            top: 45.0, left: 15.0, right: 15.0, bottom: 20.0),
+            top: 45.0, left: 15.0, right: 15.0, bottom: 15.0),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
@@ -106,26 +110,20 @@ class _HomeScreenState extends State<HomeScreen> {
       )),
       Expanded(
           child: ListView(
+        padding: const EdgeInsets.only(top: 10.0),
         children: [
           Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                      maxLength: 30,
-                      decoration: const InputDecoration(
-                        // icon: Icon(Icons.title_rounded),
-                        hintText: 'Title (Optional)',
-                      ),
-                      controller: titleController),
-                  const Text(
-                    'Add Items',
-                    style: TextStyle(fontSize: 17.5),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
+                  // TextField(
+                  //     maxLength: 30,
+                  //     decoration: const InputDecoration(
+                  //       // icon: Icon(Icons.title_rounded),
+                  //       hintText: 'Title (Optional)',
+                  //     ),
+                  //     controller: titleController),
                   Card(
                       clipBehavior: Clip.hardEdge,
                       child: Padding(
@@ -133,81 +131,130 @@ class _HomeScreenState extends State<HomeScreen> {
                             top: 5.0, left: 20.0, right: 20.0, bottom: 10.0),
                         child: Form(
                             key: _itemFormKey,
-                            child: Column(children: [
-                              TextField(
-                                controller: itemNameController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Item Name (optional)',
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 5.0,
-                              ),
-                              Row(children: [
-                                Expanded(
-                                    flex: 5,
-                                    child: buildTextFormField(
-                                        costController,
-                                        Icons.attach_money_rounded,
-                                        'Cost',
-                                        true)),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                Expanded(
-                                    flex: 3,
-                                    child: buildTextFormField(
-                                        quantityController,
-                                        Icons.numbers_rounded,
-                                        'Quantity',
-                                        false)),
-                              ]),
-                              const SizedBox(
-                                height: 10.0,
-                              ),
-                              Align(
-                                  alignment: Alignment.centerRight,
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_itemFormKey.currentState!
-                                            .validate()) {
-                                          setState(() {
-                                            items = [
-                                              ...items,
-                                              {
-                                                "name": itemNameController.text,
-                                                "cost": double.parse(
-                                                    costController.text
-                                                        .replaceAll(',', '')),
-                                                "quantity": int.parse(
-                                                    quantityController.text),
-                                              }
-                                            ];
-                                          });
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  const Text(
+                                    'Add Items',
+                                    style: TextStyle(
+                                        fontSize: 17.5,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  TextField(
+                                    controller: itemNameController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Item Name (optional)',
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 5.0,
+                                  ),
+                                  Row(children: [
+                                    Expanded(
+                                        flex: 5,
+                                        child: buildTextFormField(
+                                            costController,
+                                            Icons.attach_money_rounded,
+                                            'Cost',
+                                            true)),
+                                    const SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Expanded(
+                                        flex: 3,
+                                        child: buildTextFormField(
+                                            quantityController,
+                                            Icons.numbers_rounded,
+                                            'Quantity',
+                                            false)),
+                                  ]),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: paidSum <= costSum
+                                                ? null
+                                                : () {
+                                                    if (paidSum > costSum) {
+                                                      double remainder =
+                                                          paidSum - costSum;
+                                                      if (quantityController
+                                                              .text ==
+                                                          '') {
+                                                        quantityController
+                                                            .text = '1';
+                                                      } else {
+                                                        int quantity = int.parse(
+                                                            quantityController
+                                                                .text);
+                                                        remainder = remainder /
+                                                            quantity;
+                                                      }
+                                                      costController.text =
+                                                          remainder
+                                                              .toStringAsFixed(
+                                                                  2);
+                                                    }
+                                                  },
+                                            child:
+                                                const Text('Fill Remainder')),
+                                        const SizedBox(width: 10.0),
+                                        SizedBox(
+                                            width: 110,
+                                            child: ElevatedButton(
+                                                onPressed: () {
+                                                  if (_itemFormKey.currentState!
+                                                      .validate()) {
+                                                    double cost = double.parse(
+                                                        costController.text
+                                                            .replaceAll(
+                                                                ',', ''));
+                                                    int quantity = int.parse(
+                                                        quantityController
+                                                            .text);
+                                                    setState(() {
+                                                      items = [
+                                                        ...items,
+                                                        {
+                                                          "name":
+                                                              itemNameController
+                                                                  .text,
+                                                          "cost": cost,
+                                                          "quantity": quantity,
+                                                        }
+                                                      ];
+                                                    });
 
-                                          itemNameController.clear();
-                                          costController.clear();
-                                          quantityController.clear();
+                                                    costSum += cost * quantity;
 
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text('Item added!')),
-                                          );
-                                        }
-                                      },
-                                      child: const Text('Add Item')))
-                            ])),
+                                                    itemNameController.clear();
+                                                    costController.clear();
+                                                    quantityController.clear();
+
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                          content: Text(
+                                                              'Item added!')),
+                                                    );
+                                                  }
+                                                },
+                                                child: Text('Add Item')))
+                                      ])
+                                ])),
                       )),
                   const SizedBox(
-                    height: 20.0,
-                  ),
-                  const Text(
-                    'Add Payees',
-                    style: TextStyle(fontSize: 17.5),
-                  ),
-                  const SizedBox(
-                    height: 5,
+                    height: 15.0,
                   ),
                   Card(
                       clipBehavior: Clip.hardEdge,
@@ -216,61 +263,102 @@ class _HomeScreenState extends State<HomeScreen> {
                             top: 5.0, left: 20.0, right: 20.0, bottom: 10.0),
                         child: Form(
                             key: _payeeFormKey,
-                            child: Column(children: [
-                              Row(children: [
-                                Expanded(
-                                    flex: 5,
-                                    child: TextField(
-                                      controller: payeeNameController,
-                                      decoration: const InputDecoration(
-                                        hintText: 'Payee Name (optional)',
-                                      ),
-                                    )),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                Expanded(
-                                    flex: 3,
-                                    child: buildTextFormField(
-                                        paidController,
-                                        Icons.attach_money_rounded,
-                                        'Paid',
-                                        true)),
-                              ]),
-                              const SizedBox(
-                                height: 10.0,
-                              ),
-                              Align(
-                                  alignment: Alignment.centerRight,
-                                  child: ElevatedButton(
-                                      onPressed: () {
-                                        if (_payeeFormKey.currentState!
-                                            .validate()) {
-                                          setState(() {
-                                            payees = [
-                                              ...payees,
-                                              {
-                                                "name":
-                                                    payeeNameController.text,
-                                                "paid": double.parse(
-                                                    paidController.text
-                                                        .replaceAll(',', '')),
-                                              }
-                                            ];
-                                          });
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  const Text(
+                                    'Add Payees',
+                                    style: TextStyle(
+                                        fontSize: 17.5,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Row(children: [
+                                    Expanded(
+                                        flex: 5,
+                                        child: TextField(
+                                          controller: payeeNameController,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Payee Name (optional)',
+                                          ),
+                                        )),
+                                    const SizedBox(
+                                      width: 10.0,
+                                    ),
+                                    Expanded(
+                                        flex: 3,
+                                        child: buildTextFormField(
+                                            paidController,
+                                            Icons.attach_money_rounded,
+                                            'Paid',
+                                            true)),
+                                  ]),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: costSum <= paidSum
+                                                ? null
+                                                : () {
+                                                    if (costSum > paidSum) {
+                                                      paidController.text =
+                                                          (costSum - paidSum)
+                                                              .toStringAsFixed(
+                                                                  2);
+                                                    }
+                                                  },
+                                            child:
+                                                const Text('Fill Remainder')),
+                                        const SizedBox(width: 10.0),
+                                        SizedBox(
+                                            width: 110,
+                                            child: ElevatedButton(
+                                                onPressed: () {
+                                                  if (_payeeFormKey
+                                                      .currentState!
+                                                      .validate()) {
+                                                    double paid = double.parse(
+                                                        paidController.text
+                                                            .replaceAll(
+                                                                ',', ''));
+                                                    setState(() {
+                                                      payees = [
+                                                        ...payees,
+                                                        {
+                                                          "name":
+                                                              payeeNameController
+                                                                  .text,
+                                                          "paid": paid,
+                                                        }
+                                                      ];
+                                                    });
 
-                                          payeeNameController.clear();
-                                          paidController.clear();
+                                                    paidSum += paid;
 
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text('Payee added!')),
-                                          );
-                                        }
-                                      },
-                                      child: const Text('Add Payee')))
-                            ])),
+                                                    payeeNameController.clear();
+                                                    paidController.clear();
+
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                          content: Text(
+                                                              'Payee added!')),
+                                                    );
+                                                  }
+                                                },
+                                                child:
+                                                    const Text('Add Payee'))),
+                                      ]),
+                                ])),
                       )),
                   const SizedBox(
                     height: 20.0,
@@ -285,17 +373,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const Text(
                     'Split Details',
-                    style: TextStyle(fontSize: 17.5),
+                    style:
+                        TextStyle(fontSize: 17.5, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 20.0,
                   ),
                   const Text(
                     'Items',
-                    style: TextStyle(fontSize: 15),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
-                    height: 5.0,
+                    height: 10.0,
                   ),
                   Column(
                     children: [
@@ -306,6 +395,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             motion: const BehindMotion(),
                             dismissible: DismissiblePane(onDismissed: () {
                               setState(() {
+                                costSum -=
+                                    items[i]['cost'] * items[i]['quantity'];
                                 items.removeAt(i);
                               });
                             }),
@@ -317,6 +408,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Slidable.of(context)!.dismiss(ResizeRequest(
                                       const Duration(milliseconds: 300), () {
                                     setState(() {
+                                      costSum -= items[i]['cost'] *
+                                          items[i]['quantity'];
                                       items.removeAt(i);
                                     });
                                   }));
@@ -328,29 +421,39 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          child: ListTile(
-                            title: Text(items[i]['name'] != ''
-                                ? items[i]['name']
-                                : 'Item ${i + 1}'),
-                            leading: Text((i + 1).toString()),
-                            subtitle: Text(
-                                "Cost: RM ${items[i]['cost'].toStringAsFixed(2)}, Quantity: ${items[i]['quantity']}"),
-                            trailing: Text(
-                                'RM ${(items[i]['cost'] * items[i]['quantity']).toStringAsFixed(2)}'),
-                            minLeadingWidth: 12,
-                          ),
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      top: i == 0
+                                          ? BorderSide(
+                                              color: Colors.grey.shade200)
+                                          : BorderSide.none,
+                                      bottom: BorderSide(
+                                          color: Colors.grey.shade200))),
+                              child: ListTile(
+                                title: Text(items[i]['name'] != ''
+                                    ? items[i]['name']
+                                    : 'Item ${i + 1}'),
+                                leading: Text((i + 1).toString()),
+                                subtitle: Text(
+                                    "Cost: RM ${items[i]['cost'].toStringAsFixed(2)}, Quantity: ${items[i]['quantity']}"),
+                                trailing: Text(
+                                    'RM ${(items[i]['cost'] * items[i]['quantity']).toStringAsFixed(2)}'),
+                                minLeadingWidth: 12,
+                              )),
                         ),
                     ],
                   ),
+                  Text(costSum.toStringAsFixed(2)),
                   const SizedBox(
                     height: 20.0,
                   ),
                   const Text(
                     'Payees',
-                    style: TextStyle(fontSize: 15),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
-                    height: 5.0,
+                    height: 10.0,
                   ),
                   Column(
                     children: [
@@ -361,6 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             motion: const BehindMotion(),
                             dismissible: DismissiblePane(onDismissed: () {
                               setState(() {
+                                paidSum -= payees[i]['paid'];
                                 payees.removeAt(i);
                               });
                             }),
@@ -372,6 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Slidable.of(context)!.dismiss(ResizeRequest(
                                       const Duration(milliseconds: 300), () {
                                     setState(() {
+                                      paidSum -= payees[i]['paid'];
                                       payees.removeAt(i);
                                     });
                                   }));
@@ -383,23 +488,34 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          child: ListTile(
-                            title: Text(payees[i]['name'] != ''
-                                ? payees[i]['name']
-                                : 'Payee ${i + 1}'),
-                            leading: Text((i + 1).toString()),
-                            trailing: Text(
-                                'RM ${payees[i]['paid'].toStringAsFixed(2)}'),
-                            minLeadingWidth: 12,
-                          ),
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      top: i == 0
+                                          ? BorderSide(
+                                              color: Colors.grey.shade200)
+                                          : BorderSide.none,
+                                      bottom: BorderSide(
+                                          color: Colors.grey.shade200))),
+                              child: ListTile(
+                                title: Text(payees[i]['name'] != ''
+                                    ? payees[i]['name']
+                                    : 'Payee ${i + 1}'),
+                                leading: Text((i + 1).toString()),
+                                trailing: Text(
+                                    'RM ${payees[i]['paid'].toStringAsFixed(2)}'),
+                                minLeadingWidth: 12,
+                              )),
                         ),
                     ],
                   ),
-                  SizedBox(height: 20.0),
+                  Text(paidSum.toStringAsFixed(2)),
+                  const SizedBox(height: 20.0),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(40)),
-                      onPressed: () {},
+                      onPressed:
+                          costSum != paidSum || costSum == 0 ? null : () {},
                       child: Text('Split', style: TextStyle(fontSize: 17.5))),
                   SizedBox(height: 10.0),
                 ],
