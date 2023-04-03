@@ -4,13 +4,11 @@ import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import './ui/home.dart';
+import 'globals.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
-const PRIMARY_COLOR = Color.fromRGBO(30, 148, 120, 1);
-const SECONDARY_COLOR = Color.fromRGBO(41, 196, 160, 1);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

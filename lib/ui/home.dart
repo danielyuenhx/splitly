@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
 import 'package:flutter_slidable/flutter_slidable.dart';
 
+import '../globals.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -19,6 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController itemNameController = TextEditingController();
   TextEditingController costController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
+
+  TextEditingController payeeNameController = TextEditingController();
   TextEditingController paidController = TextEditingController();
 
   @override
@@ -28,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
     itemNameController.dispose();
     costController.dispose();
     quantityController.dispose();
+
+    payeeNameController.dispose();
     paidController.dispose();
   }
 
@@ -49,15 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  TextFormField buildTextFormField(
-      controller, validate, icon, hintText, digitsOnly, currency) {
+  TextFormField buildTextFormField(TextEditingController controller,
+      IconData icon, String hintText, bool currency) {
     return TextFormField(
         controller: controller,
         validator: (value) {
-          if (validate) {
-            if (value == null || value.isEmpty) {
-              return 'Enter data';
-            }
+          if (value == null || value.isEmpty) {
+            return 'Enter data';
           }
           return null;
         },
@@ -65,32 +69,27 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Icon(icon),
           hintText: hintText,
         ),
-        keyboardType: digitsOnly ? TextInputType.number : TextInputType.text,
-        inputFormatters: digitsOnly
-            ? [
-                FilteringTextInputFormatter.digitsOnly,
-              ]
-            : [],
+        keyboardType: TextInputType.number,
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
         onChanged: currency
-            ? (value) => formatCurrencyHandler(value, costController)
+            ? (value) => formatCurrencyHandler(value, controller)
             : (value) {});
-  }
-
-  Text buildItemList(name) {
-    return Text(name);
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      Padding(
+      Container(
+          child: Padding(
         padding: const EdgeInsets.only(
-            top: 45.0, left: 15.0, right: 15.0, bottom: 15.0),
+            top: 45.0, left: 15.0, right: 15.0, bottom: 20.0),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: const [
-              Icon(Icons.spa_outlined),
+              Icon(Icons.spa_outlined, color: Colors.black),
               SizedBox(
                 width: 15.0,
               ),
@@ -104,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(onPressed: () {}, child: const Text('Save'))
         ]),
-      ),
+      )),
       Expanded(
           child: ListView(
         children: [
@@ -149,10 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     flex: 5,
                                     child: buildTextFormField(
                                         costController,
-                                        true,
                                         Icons.attach_money_rounded,
                                         'Cost',
-                                        true,
                                         true)),
                                 const SizedBox(
                                   width: 10.0,
@@ -161,10 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     flex: 3,
                                     child: buildTextFormField(
                                         quantityController,
-                                        true,
                                         Icons.numbers_rounded,
                                         'Quantity',
-                                        true,
                                         false)),
                               ]),
                               const SizedBox(
@@ -190,11 +185,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ];
                                           });
 
-                                          print(items);
-
                                           itemNameController.clear();
                                           costController.clear();
                                           quantityController.clear();
+
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             const SnackBar(
@@ -220,43 +214,63 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(
                             top: 5.0, left: 20.0, right: 20.0, bottom: 10.0),
-                        child: Column(children: [
-                          Row(children: [
-                            const Expanded(
-                                flex: 5,
-                                child: TextField(
-                                  decoration: InputDecoration(
-                                    hintText: 'Payee Name (optional)',
-                                  ),
-                                )),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                                flex: 3,
-                                child: TextField(
-                                  controller: paidController,
-                                  decoration: const InputDecoration(
-                                    icon: Icon(Icons.attach_money_rounded),
-                                    hintText: 'Paid',
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly
-                                  ],
-                                  onChanged: (value) => formatCurrencyHandler(
-                                      value, paidController),
-                                )),
-                          ]),
-                          const SizedBox(
-                            height: 10.0,
-                          ),
-                          Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton(
-                                  onPressed: () {},
-                                  child: const Text('Add Payee')))
-                        ]),
+                        child: Form(
+                            key: _payeeFormKey,
+                            child: Column(children: [
+                              Row(children: [
+                                Expanded(
+                                    flex: 5,
+                                    child: TextField(
+                                      controller: payeeNameController,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Payee Name (optional)',
+                                      ),
+                                    )),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                Expanded(
+                                    flex: 3,
+                                    child: buildTextFormField(
+                                        paidController,
+                                        Icons.attach_money_rounded,
+                                        'Paid',
+                                        true)),
+                              ]),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_payeeFormKey.currentState!
+                                            .validate()) {
+                                          setState(() {
+                                            payees = [
+                                              ...payees,
+                                              {
+                                                "name":
+                                                    payeeNameController.text,
+                                                "paid": double.parse(
+                                                    paidController.text
+                                                        .replaceAll(',', '')),
+                                              }
+                                            ];
+                                          });
+
+                                          payeeNameController.clear();
+                                          paidController.clear();
+
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text('Payee added!')),
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Add Payee')))
+                            ])),
                       )),
                   const SizedBox(
                     height: 20.0,
@@ -272,6 +286,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text(
                     'Split Details',
                     style: TextStyle(fontSize: 17.5),
+                  ),
+                  const SizedBox(
+                    height: 20.0,
+                  ),
+                  const Text(
+                    'Items',
+                    style: TextStyle(fontSize: 15),
                   ),
                   const SizedBox(
                     height: 5.0,
@@ -313,22 +334,74 @@ class _HomeScreenState extends State<HomeScreen> {
                                 : 'Item ${i + 1}'),
                             leading: Text((i + 1).toString()),
                             subtitle: Text(
-                                "Cost: ${items[i]['cost']}, Quantity: ${items[i]['quantity']}"),
+                                "Cost: RM ${items[i]['cost'].toStringAsFixed(2)}, Quantity: ${items[i]['quantity']}"),
                             trailing: Text(
-                                (items[i]['cost'] * items[i]['quantity'])
-                                    .toStringAsFixed(2)),
+                                'RM ${(items[i]['cost'] * items[i]['quantity']).toStringAsFixed(2)}'),
                             minLeadingWidth: 12,
                           ),
                         ),
                     ],
                   ),
-                  SizedBox(
-                    height: 90,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [Chip(label: Text("Text"))],
-                    ),
-                  )
+                  const SizedBox(
+                    height: 20.0,
+                  ),
+                  const Text(
+                    'Payees',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  const SizedBox(
+                    height: 5.0,
+                  ),
+                  Column(
+                    children: [
+                      for (var i = 0; i < payees.length; i++)
+                        Slidable(
+                          key: UniqueKey(),
+                          endActionPane: ActionPane(
+                            motion: const BehindMotion(),
+                            dismissible: DismissiblePane(onDismissed: () {
+                              setState(() {
+                                payees.removeAt(i);
+                              });
+                            }),
+                            extentRatio: 0.3,
+                            children: [
+                              SlidableAction(
+                                autoClose: false,
+                                onPressed: (BuildContext context) {
+                                  Slidable.of(context)!.dismiss(ResizeRequest(
+                                      const Duration(milliseconds: 300), () {
+                                    setState(() {
+                                      payees.removeAt(i);
+                                    });
+                                  }));
+                                },
+                                backgroundColor: Color(0xFFFE4A49),
+                                foregroundColor: Colors.white,
+                                icon: Icons.delete,
+                                label: 'Delete',
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Text(payees[i]['name'] != ''
+                                ? payees[i]['name']
+                                : 'Payee ${i + 1}'),
+                            leading: Text((i + 1).toString()),
+                            trailing: Text(
+                                'RM ${payees[i]['paid'].toStringAsFixed(2)}'),
+                            minLeadingWidth: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(40)),
+                      onPressed: () {},
+                      child: Text('Split', style: TextStyle(fontSize: 17.5))),
+                  SizedBox(height: 10.0),
                 ],
               ))
         ],
