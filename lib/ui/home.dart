@@ -21,6 +21,16 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController quantityController = TextEditingController();
   TextEditingController paidController = TextEditingController();
 
+  @override
+  void dispose() {
+    super.dispose();
+    titleController.dispose();
+    itemNameController.dispose();
+    costController.dispose();
+    quantityController.dispose();
+    paidController.dispose();
+  }
+
   var items = [];
   var payees = [];
 
@@ -171,9 +181,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ...items,
                                               {
                                                 "name": itemNameController.text,
-                                                "cost": costController.text,
-                                                "quantity":
-                                                    quantityController.text
+                                                "cost": double.parse(
+                                                    costController.text
+                                                        .replaceAll(',', '')),
+                                                "quantity": int.parse(
+                                                    quantityController.text),
                                               }
                                             ];
                                           });
@@ -261,12 +273,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Split Details',
                     style: TextStyle(fontSize: 17.5),
                   ),
+                  const SizedBox(
+                    height: 5.0,
+                  ),
                   Column(
                     children: [
                       for (var i = 0; i < items.length; i++)
                         Slidable(
-                          // Specify a key if the Slidable is dismissible.
-                          key: ValueKey(i),
+                          key: UniqueKey(),
                           endActionPane: ActionPane(
                             motion: const BehindMotion(),
                             dismissible: DismissiblePane(onDismissed: () {
@@ -274,13 +288,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 items.removeAt(i);
                               });
                             }),
-                            // All actions are defined in the children parameter.
+                            extentRatio: 0.3,
                             children: [
                               SlidableAction(
-                                autoClose: true,
+                                autoClose: false,
                                 onPressed: (BuildContext context) {
-                                  Slidable.of(context)!.dismiss(
-                                      ResizeRequest(Duration(seconds: 1), () {
+                                  Slidable.of(context)!.dismiss(ResizeRequest(
+                                      const Duration(milliseconds: 300), () {
                                     setState(() {
                                       items.removeAt(i);
                                     });
@@ -292,16 +306,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 label: 'Delete',
                               ),
                             ],
-                            extentRatio: 0.3,
                           ),
-
                           child: ListTile(
-                            title: Text(items[i]['name']),
+                            title: Text(items[i]['name'] != ''
+                                ? items[i]['name']
+                                : 'Item ${i + 1}'),
+                            leading: Text((i + 1).toString()),
                             subtitle: Text(
                                 "Cost: ${items[i]['cost']}, Quantity: ${items[i]['quantity']}"),
-                            trailing: Text((double.parse(items[i]['cost']) *
-                                    double.parse(items[i]['quantity']))
-                                .toString()),
+                            trailing: Text(
+                                (items[i]['cost'] * items[i]['quantity'])
+                                    .toStringAsFixed(2)),
+                            minLeadingWidth: 12,
                           ),
                         ),
                     ],
