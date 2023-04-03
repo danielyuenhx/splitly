@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import "package:intl/intl.dart";
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -10,19 +12,22 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _itemFormKey = GlobalKey<FormState>();
+  final _payeeFormKey = GlobalKey<FormState>();
+
   TextEditingController titleController = TextEditingController();
+  TextEditingController itemNameController = TextEditingController();
   TextEditingController costController = TextEditingController();
+  TextEditingController quantityController = TextEditingController();
   TextEditingController paidController = TextEditingController();
 
   var items = [];
   var payees = [];
 
   void formatCurrencyHandler(value, controller) {
-    bool isFirst = true;
     String newValue = value.replaceAll(',', '').replaceAll('.', '');
     if (value.isEmpty || newValue == '00') {
       controller.clear();
-      isFirst = true;
       return;
     }
     double value1 = double.parse(newValue);
@@ -32,6 +37,37 @@ class _HomeScreenState extends State<HomeScreen> {
       text: value,
       selection: TextSelection.collapsed(offset: value.length),
     );
+  }
+
+  TextFormField buildTextFormField(
+      controller, validate, icon, hintText, digitsOnly, currency) {
+    return TextFormField(
+        controller: controller,
+        validator: (value) {
+          if (validate) {
+            if (value == null || value.isEmpty) {
+              return 'Enter data';
+            }
+          }
+          return null;
+        },
+        decoration: InputDecoration(
+          icon: Icon(icon),
+          hintText: hintText,
+        ),
+        keyboardType: digitsOnly ? TextInputType.number : TextInputType.text,
+        inputFormatters: digitsOnly
+            ? [
+                FilteringTextInputFormatter.digitsOnly,
+              ]
+            : [],
+        onChanged: currency
+            ? (value) => formatCurrencyHandler(value, costController)
+            : (value) {});
+  }
+
+  Text buildItemList(name) {
+    return Text(name);
   }
 
   @override
@@ -56,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       letterSpacing: 1)),
             ],
           ),
-          ElevatedButton(onPressed: () {}, child: Text('Save'))
+          ElevatedButton(onPressed: () {}, child: const Text('Save'))
         ]),
       ),
       Expanded(
@@ -86,54 +122,76 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Padding(
                         padding: const EdgeInsets.only(
                             top: 5.0, left: 20.0, right: 20.0, bottom: 10.0),
-                        child: Column(children: [
-                          TextField(
-                            decoration: const InputDecoration(
-                              hintText: 'Item Name (optional)',
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 5.0,
-                          ),
-                          Row(children: [
-                            Expanded(
-                                flex: 5,
-                                child: TextField(
-                                    controller: costController,
-                                    decoration: const InputDecoration(
-                                      icon: Icon(Icons.attach_money_rounded),
-                                      hintText: 'Cost',
-                                    ),
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    onChanged: (value) => formatCurrencyHandler(
-                                        value, costController))),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                                flex: 3,
-                                child: TextField(
-                                  decoration: const InputDecoration(
-                                    icon: Icon(Icons.numbers_rounded),
-                                    hintText: 'Quantity',
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
-                                )),
-                          ]),
-                          const SizedBox(
-                            height: 10.0,
-                          ),
-                          Align(
-                              alignment: Alignment.centerRight,
-                              child: ElevatedButton(
-                                  onPressed: () {}, child: Text('Add Item')))
-                        ]),
+                        child: Form(
+                            key: _itemFormKey,
+                            child: Column(children: [
+                              TextField(
+                                controller: itemNameController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Item Name (optional)',
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 5.0,
+                              ),
+                              Row(children: [
+                                Expanded(
+                                    flex: 5,
+                                    child: buildTextFormField(
+                                        costController,
+                                        true,
+                                        Icons.attach_money_rounded,
+                                        'Cost',
+                                        true,
+                                        true)),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                Expanded(
+                                    flex: 3,
+                                    child: buildTextFormField(
+                                        quantityController,
+                                        true,
+                                        Icons.numbers_rounded,
+                                        'Quantity',
+                                        true,
+                                        false)),
+                              ]),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              Align(
+                                  alignment: Alignment.centerRight,
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        if (_itemFormKey.currentState!
+                                            .validate()) {
+                                          setState(() {
+                                            items = [
+                                              ...items,
+                                              {
+                                                "name": itemNameController.text,
+                                                "cost": costController.text,
+                                                "quantity":
+                                                    quantityController.text
+                                              }
+                                            ];
+                                          });
+
+                                          print(items);
+
+                                          itemNameController.clear();
+                                          costController.clear();
+                                          quantityController.clear();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text('Item added!')),
+                                          );
+                                        }
+                                      },
+                                      child: const Text('Add Item')))
+                            ])),
                       )),
                   const SizedBox(
                     height: 20.0,
@@ -152,10 +210,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             top: 5.0, left: 20.0, right: 20.0, bottom: 10.0),
                         child: Column(children: [
                           Row(children: [
-                            Expanded(
+                            const Expanded(
                                 flex: 5,
                                 child: TextField(
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     hintText: 'Payee Name (optional)',
                                   ),
                                 )),
@@ -184,7 +242,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           Align(
                               alignment: Alignment.centerRight,
                               child: ElevatedButton(
-                                  onPressed: () {}, child: Text('Add Payee')))
+                                  onPressed: () {},
+                                  child: const Text('Add Payee')))
                         ]),
                       )),
                   const SizedBox(
@@ -201,6 +260,51 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text(
                     'Split Details',
                     style: TextStyle(fontSize: 17.5),
+                  ),
+                  Column(
+                    children: [
+                      for (var i = 0; i < items.length; i++)
+                        Slidable(
+                          // Specify a key if the Slidable is dismissible.
+                          key: ValueKey(i),
+                          endActionPane: ActionPane(
+                            motion: const BehindMotion(),
+                            dismissible: DismissiblePane(onDismissed: () {
+                              setState(() {
+                                items.removeAt(i);
+                              });
+                            }),
+                            // All actions are defined in the children parameter.
+                            children: [
+                              SlidableAction(
+                                autoClose: true,
+                                onPressed: (BuildContext context) {
+                                  Slidable.of(context)!.dismiss(
+                                      ResizeRequest(Duration(seconds: 1), () {
+                                    setState(() {
+                                      items.removeAt(i);
+                                    });
+                                  }));
+                                },
+                                backgroundColor: Color(0xFFFE4A49),
+                                foregroundColor: Colors.white,
+                                icon: Icons.delete,
+                                label: 'Delete',
+                              ),
+                            ],
+                            extentRatio: 0.3,
+                          ),
+
+                          child: ListTile(
+                            title: Text(items[i]['name']),
+                            subtitle: Text(
+                                "Cost: ${items[i]['cost']}, Quantity: ${items[i]['quantity']}"),
+                            trailing: Text((double.parse(items[i]['cost']) *
+                                    double.parse(items[i]['quantity']))
+                                .toString()),
+                          ),
+                        ),
+                    ],
                   ),
                   SizedBox(
                     height: 90,
