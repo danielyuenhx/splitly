@@ -107,12 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       letterSpacing: 1)),
             ],
           ),
-          // ElevatedButton(
-          //     onPressed: () {
-          //       print(costSum);
-          //       print(paidSum);
-          //     },
-          //     child: const Text('Save'))
+          ElevatedButton(
+              onPressed: () {
+                print(items.toString());
+                print(payees.toString());
+              },
+              child: const Text('Save'))
         ]),
       )),
       Expanded(
