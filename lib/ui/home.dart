@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import "package:intl/intl.dart";
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
+import 'split.dart';
 import '../globals.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -105,7 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       letterSpacing: 1)),
             ],
           ),
-          ElevatedButton(onPressed: () {}, child: const Text('Save'))
+          // ElevatedButton(
+          //     onPressed: () {
+          //       print(costSum);
+          //       print(paidSum);
+          //     },
+          //     child: const Text('Save'))
         ]),
       )),
       Expanded(
@@ -181,7 +188,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         ElevatedButton(
-                                            onPressed: paidSum <= costSum
+                                            onPressed: paidSum <= costSum ||
+                                                    paidSum.toStringAsFixed(
+                                                            2) ==
+                                                        costSum
+                                                            .toStringAsFixed(2)
                                                 ? null
                                                 : () {
                                                     if (paidSum > costSum) {
@@ -249,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     );
                                                   }
                                                 },
-                                                child: Text('Add Item')))
+                                                child: const Text('Add Item')))
                                       ])
                                 ])),
                       )),
@@ -305,7 +316,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         ElevatedButton(
-                                            onPressed: costSum <= paidSum
+                                            onPressed: costSum <= paidSum ||
+                                                    paidSum.toStringAsFixed(
+                                                            2) ==
+                                                        costSum
+                                                            .toStringAsFixed(2)
                                                 ? null
                                                 : () {
                                                     if (costSum > paidSum) {
@@ -444,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     ],
                   ),
-                  Text(costSum.toStringAsFixed(2)),
+                  Text('Total: RM ${costSum.toStringAsFixed(2)}'),
                   const SizedBox(
                     height: 20.0,
                   ),
@@ -509,15 +524,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     ],
                   ),
-                  Text(paidSum.toStringAsFixed(2)),
+                  Text('Total: RM ${paidSum.toStringAsFixed(2)}'),
                   const SizedBox(height: 20.0),
                   ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(40)),
-                      onPressed:
-                          costSum != paidSum || costSum == 0 ? null : () {},
-                      child: Text('Split', style: TextStyle(fontSize: 17.5))),
-                  SizedBox(height: 10.0),
+                      onPressed: costSum.toStringAsFixed(2) !=
+                                  paidSum.toStringAsFixed(2) ||
+                              costSum.toStringAsFixed(2) == '0.00'
+                          ? null
+                          : () {
+                              FocusManager.instance.primaryFocus!.unfocus();
+                              PersistentNavBarNavigator.pushNewScreen(
+                                context,
+                                screen:
+                                    SplitScreen(items: items, cost: costSum, payees: payees, paid: paidSum),
+                                withNavBar: false,
+                              );
+                            },
+                      child: const Text('Split',
+                          style: TextStyle(fontSize: 17.5))),
+                  const SizedBox(height: 10.0),
                 ],
               ))
         ],
