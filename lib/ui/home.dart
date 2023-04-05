@@ -1,9 +1,11 @@
+import 'package:cherry_toast/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import "package:intl/intl.dart";
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:cherry_toast/cherry_toast.dart';
 
 import 'split.dart';
 import '../globals.dart';
@@ -109,8 +111,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(
               onPressed: () {
-                print(items.toString());
-                print(payees.toString());
+                CherryToast.success(
+                  title: Text("Item added!"),
+                  animationDuration: Duration(milliseconds: 500),
+                  animationType: AnimationType.fromBottom,
+                  toastPosition: Position.bottom,
+                  toastDuration: Duration(milliseconds: 1000),
+                ).show(context);
               },
               child: const Text('Save'))
         ]),
@@ -251,13 +258,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     costController.clear();
                                                     quantityController.clear();
 
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                          content: Text(
-                                                              'Item added!')),
-                                                    );
+                                                    // ScaffoldMessenger.of(
+                                                    //         context)
+                                                    //     .showSnackBar(
+                                                    //   const SnackBar(
+                                                    //       content: Text(
+                                                    //           'Item added!')),
+                                                    // );
                                                   }
                                                 },
                                                 child: const Text('Add Item')))
@@ -537,8 +544,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               FocusManager.instance.primaryFocus!.unfocus();
                               PersistentNavBarNavigator.pushNewScreen(
                                 context,
-                                screen:
-                                    SplitScreen(items: items, cost: costSum, payees: payees, paid: paidSum),
+                                screen: SplitScreen(
+                                    items: items,
+                                    cost: costSum,
+                                    payees: payees,
+                                    paid: paidSum),
                                 withNavBar: false,
                               );
                             },

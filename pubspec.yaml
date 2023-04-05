@@ -40,6 +40,7 @@ dependencies:
   intl: ^0.18.0
   flutter_slidable: ^2.0.0
   animated_custom_dropdown: ^1.5.0
+  cherry_toast: ^1.1.0
 
 dev_dependencies:
   flutter_test:
