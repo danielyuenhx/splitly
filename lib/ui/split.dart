@@ -22,7 +22,10 @@ class SplitScreen extends StatefulWidget {
 
 class _SplitScreenState extends State<SplitScreen> {
   TextEditingController peopleController = TextEditingController();
+  TextEditingController buyOverController = TextEditingController();
   var peopleAmount;
+  List<String> buyOverStrategy = [];
+
   var splitAmount;
 
   var payTo;
@@ -35,6 +38,10 @@ class _SplitScreenState extends State<SplitScreen> {
       for (var i = max(widget.payees.length as int, 2); i <= 20; i++)
         '${i.toString()} people'
     ];
+    for (var i = 0; i < widget.payees.length; i++) {
+      buyOverStrategy.add(
+          '${widget.payees[i]['name'] != '' ? widget.payees[i]['name'] : 'Payee ${(i + 1).toString()}'} buys over');
+    }
   }
 
   @override
@@ -83,12 +90,12 @@ class _SplitScreenState extends State<SplitScreen> {
 
     String remainderString = '';
     if (toBePaid.floor() > 0) {
-      int numOfPeople = (toBePaid/splitAmount).floor();
+      int numOfPeople = (toBePaid / splitAmount).floor();
       // paid partially
-      double partially = toBePaid - (splitAmount*numOfPeople.floor());
+      double partially = toBePaid - (splitAmount * numOfPeople.floor());
       print(splitAmount);
       print(toBePaid);
-      
+
       remainderString +=
           ', RM ${numOfPeople >= 1 ? splitAmount.toStringAsFixed(2) : toBePaid.toStringAsFixed(2)} ${numOfPeople >= 1 ? 'from $numOfPeople ${numOfPeople > 1 ? 'people' : 'person'}' : 'paid partially by 1 person'} ${splitAmount < toBePaid && partially > 0 ? 'and RM ${partially.toStringAsFixed(2)} paid partially by 1 person' : ''}';
     }
@@ -177,6 +184,19 @@ class _SplitScreenState extends State<SplitScreen> {
     );
   }
 
+  Padding buildBuyOverSplitTab() {
+    return Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(children: [
+          CustomDropdown(
+            hintText: 'Buy over strategy',
+            items: buyOverStrategy,
+            controller: buyOverController,
+            excludeSelected: false,
+          )
+        ]));
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -195,7 +215,7 @@ class _SplitScreenState extends State<SplitScreen> {
             body: TabBarView(
               children: [
                 buildEqualSplitTab(),
-                Icon(Icons.directions_transit),
+                buildBuyOverSplitTab(),
               ],
             )));
   }
