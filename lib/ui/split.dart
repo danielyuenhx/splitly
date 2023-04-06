@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
+import 'widgets/buy_over.dart';
+
 class SplitScreen extends StatefulWidget {
   SplitScreen(
       {Key? key,
       required this.items,
-      required this.cost,
       required this.payees,
       required this.paid})
       : super(key: key);
 
   var items;
-  var cost;
   var payees;
   var paid;
 
@@ -22,14 +22,15 @@ class SplitScreen extends StatefulWidget {
 
 class _SplitScreenState extends State<SplitScreen> {
   TextEditingController peopleController = TextEditingController();
-  TextEditingController buyOverController = TextEditingController();
   var peopleAmount;
-  List<String> buyOverStrategy = [];
 
   var splitAmount;
 
   var payTo;
   var receive;
+
+  TextEditingController buyOverController = TextEditingController();
+  List<String> buyOverStrategy = [];
 
   @override
   void initState() {
@@ -38,10 +39,10 @@ class _SplitScreenState extends State<SplitScreen> {
       for (var i = max(widget.payees.length as int, 2); i <= 20; i++)
         '${i.toString()} people'
     ];
-    for (var i = 0; i < widget.payees.length; i++) {
-      buyOverStrategy.add(
-          '${widget.payees[i]['name'] != '' ? widget.payees[i]['name'] : 'Payee ${(i + 1).toString()}'} buys over');
-    }
+    // for (var i = 0; i < widget.payees.length; i++) {
+    //   buyOverStrategy.add(
+    //       '${widget.payees[i]['name'] != '' ? widget.payees[i]['name'] : 'Payee ${(i + 1).toString()}'} buys over');
+    // }
   }
 
   @override
@@ -115,7 +116,7 @@ class _SplitScreenState extends State<SplitScreen> {
           onChanged: (value) {
             setState(() {
               splitAmount =
-                  widget.cost / int.parse(peopleController.text.split(' ')[0]);
+                  widget.paid / int.parse(peopleController.text.split(' ')[0]);
               var underpaid = [];
               var overpaid = [];
 
@@ -124,16 +125,12 @@ class _SplitScreenState extends State<SplitScreen> {
                   .asMap()
                   .forEach((index, payee) => payee['paid'] < splitAmount
                       ? underpaid.add({
-                          "name": payee['name'] != ''
-                              ? payee['name']
-                              : 'Payee ${(index + 1).toString()}',
+                          "name": payee['name'],
                           "remainder": splitAmount - payee['paid']
                         })
                       : payee['paid'] > splitAmount
                           ? overpaid.add({
-                              "name": payee['name'] != ''
-                                  ? payee['name']
-                                  : 'Payee ${(index + 1).toString()}',
+                              "name": payee['name'],
                               "remainder": payee['paid'] - splitAmount,
                               "toBePaid": payee['paid'] - splitAmount,
                               "paidBy": [],
@@ -193,6 +190,7 @@ class _SplitScreenState extends State<SplitScreen> {
             items: buyOverStrategy,
             controller: buyOverController,
             excludeSelected: false,
+            onChanged: (value) {print(value);},
           )
         ]));
   }
@@ -215,7 +213,7 @@ class _SplitScreenState extends State<SplitScreen> {
             body: TabBarView(
               children: [
                 buildEqualSplitTab(),
-                buildBuyOverSplitTab(),
+                BuyOverTab(items: widget.items, payees: widget.payees, paid: widget.paid)
               ],
             )));
   }

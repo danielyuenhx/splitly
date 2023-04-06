@@ -546,8 +546,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 context,
                                 screen: SplitScreen(
                                     items: items,
-                                    cost: costSum,
-                                    payees: payees,
+                                    payees: [...payees.asMap().entries.map((payee) {
+                                      int index = payee.key;
+                                      return {
+                                        "name": payee.value['name'] != ''
+                                            ? payee.value['name']
+                                            : 'Payee ${index+1}',
+                                        "paid": payee.value['paid']
+                                      };
+                                    })],
                                     paid: paidSum),
                                 withNavBar: false,
                               );
