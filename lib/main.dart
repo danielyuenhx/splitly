@@ -53,7 +53,7 @@ class _AppWidgetState extends State<AppWidget> {
   List<Widget> _buildScreens() {
     return [
       HomeScreen(),
-      HomeScreen(),
+      // HomeScreen(),
       HomeScreen(),
     ];
   }
@@ -66,12 +66,12 @@ class _AppWidgetState extends State<AppWidget> {
         activeColorPrimary: PRIMARY_COLOR,
         inactiveColorPrimary: Colors.grey.shade500,
       ),
-      PersistentBottomNavBarItem(
-        icon: Icon(Icons.backup_table),
-        title: ("Presets"),
-        activeColorPrimary: PRIMARY_COLOR,
-        inactiveColorPrimary: Colors.grey.shade500,
-      ),
+      // PersistentBottomNavBarItem(
+      //   icon: Icon(Icons.backup_table),
+      //   title: ("Presets"),
+      //   activeColorPrimary: PRIMARY_COLOR,
+      //   inactiveColorPrimary: Colors.grey.shade500,
+      // ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.history),
         title: ("History"),
@@ -84,25 +84,28 @@ class _AppWidgetState extends State<AppWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+        resizeToAvoidBottomInset: true,
         body: PersistentTabView(
-      context,
-      navBarHeight: MediaQuery.of(context).viewInsets.bottom > 0 ? 0.0 : kBottomNavigationBarHeight,
-      screens: _buildScreens(),
-      items: _navBarItems(),
-      navBarStyle: NavBarStyle.style3,
-      popActionScreens: PopActionScreensType.all,
-      itemAnimationProperties: const ItemAnimationProperties(
-        // Navigation Bar's items animation properties.
-        duration: Duration(milliseconds: 200),
-        curve: Curves.ease,
-      ),
-      screenTransitionAnimation: const ScreenTransitionAnimation(
-        // Screen transition animation on change of selected tab.
-        animateTabTransition: true,
-        curve: Curves.ease,
-        duration: Duration(milliseconds: 350),
-      ),
-    ));
+          controller: _controller,
+          context,
+          navBarHeight: MediaQuery.of(context).viewInsets.bottom > 0
+              ? 0.0
+              : kBottomNavigationBarHeight,
+          screens: _buildScreens(),
+          items: _navBarItems(),
+          navBarStyle: NavBarStyle.style3,
+          popActionScreens: PopActionScreensType.all,
+          itemAnimationProperties: const ItemAnimationProperties(
+            // Navigation Bar's items animation properties.
+            duration: Duration(milliseconds: 200),
+            curve: Curves.ease,
+          ),
+          screenTransitionAnimation: const ScreenTransitionAnimation(
+            // Screen transition animation on change of selected tab.
+            animateTabTransition: true,
+            curve: Curves.ease,
+            duration: Duration(milliseconds: 350),
+          ),
+        ));
   }
 }

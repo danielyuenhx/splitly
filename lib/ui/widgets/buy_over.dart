@@ -54,10 +54,14 @@ class _BuyOverState extends State<BuyOverTab> {
           style: const TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold)),
       const Divider(),
       Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+              child: Container(
+                  // decoration: BoxDecoration(
+                  //     border: Border(right: BorderSide(color: Colors.black))),
+                  child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Receive',
@@ -67,10 +71,10 @@ class _BuyOverState extends State<BuyOverTab> {
                       color: Colors.green)),
               for (var e in receive) Text(e)
             ],
-          )),
+          ))),
           Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Pay',
@@ -131,16 +135,25 @@ class _BuyOverState extends State<BuyOverTab> {
 
     var receive = [];
     for (var paid in receiveFrom) {
-      receive.add(
-          'RM ${(splitAmount - paid['paid']).toStringAsFixed(2)} from ${paid['name']}');
+      receive.add(RichText(
+          text: TextSpan(
+        text: "RM ${(splitAmount - paid['paid']).toStringAsFixed(2)}",
+        style: const TextStyle(fontWeight: FontWeight.bold),
+        children: [
+          const TextSpan(text: 'from'),
+          TextSpan(text: "${paid['name']}"),
+        ],
+      )));
     }
+    // 'RM ${(splitAmount - paid['paid']).toStringAsFixed(2)} from ${paid['name']}');
+    // }
 
     // the buyover checking who to pay/receive from
     int numOfOthers = numOfPeople - widget.payees.length;
     double toBePaid = (numOfOthers * splitAmount).toDouble();
 
     receive.add(numOfOthers > 0
-        ? 'RM ${toBePaid.toStringAsFixed(2)} from others, RM ${splitAmount.toStringAsFixed(2)} each from ${numOfPeople - widget.payees.length} people'
+        ? 'RM ${toBePaid.toStringAsFixed(2)} from others, RM ${splitAmount.toStringAsFixed(2)} each from ${numOfPeople - widget.payees.length} ${numOfOthers == 1 ? "person" : 'people'}'
         : '');
 
     res.insert(0, buildBuyOverSection(buyOverName, pay, receive, true));
@@ -178,13 +191,28 @@ class _BuyOverState extends State<BuyOverTab> {
                   splitAmount = widget.paid /
                       int.parse(peopleController.text.split(' ')[0]);
                 });
-                print(splitAmount);
-                print(buyOverIndex);
               }),
+          const SizedBox(
+            height: 15.0,
+          ),
           if (buyOverIndex != null && splitAmount != null)
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              ...buildBuyOverSections(),
-            ]),
+            Expanded(
+                child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  ...buildBuyOverSections(),
+                ])),
+          const SizedBox(
+            height: 15.0,
+          ),
+          if (buyOverIndex != null && splitAmount != null)
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(40)),
+                onPressed: () {},
+                child:
+                    const Text('Save Split', style: TextStyle(fontSize: 17.5))),
         ]));
   }
 }
