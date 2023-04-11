@@ -52,41 +52,63 @@ class _BuyOverState extends State<BuyOverTab> {
       ),
       Text('$name ${buyOver ? '(Buyer)' : ''}',
           style: const TextStyle(fontSize: 17.0, fontWeight: FontWeight.bold)),
-      const Divider(),
-      Row(
+      // const Divider(),
+      const SizedBox(
+        height: 5.0,
+      ),
+      IntrinsicHeight(
+          child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
               child: Container(
-                  // decoration: BoxDecoration(
-                  //     border: Border(right: BorderSide(color: Colors.black))),
-                  child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Receive',
-                  style: TextStyle(
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green)),
-              for (var e in receive) Text(e)
-            ],
-          ))),
+                  decoration: BoxDecoration(
+                      border: Border(
+                          top: BorderSide(
+                              color: Colors.grey.shade300, width: 1.25))),
+                  child: Padding(
+                      padding: const EdgeInsets.only(top: 5.0, right: 10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Receive',
+                              style: TextStyle(
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green)),
+                          for (var e in receive) Text(e)
+                        ],
+                      )))),
+          VerticalDivider(
+            color: Colors.grey.shade300,
+            width: 0,
+          ),
           Expanded(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Pay',
-                  style: TextStyle(
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red)),
-              for (var e in pay) Text(e)
-            ],
-          )),
+              child: Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                          top: BorderSide(
+                              color: Colors.grey.shade300, width: 1.25))),
+                  child: Padding(
+                      padding: const EdgeInsets.only(top: 5.0, left: 10.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Pay',
+                              style: TextStyle(
+                                  fontSize: 15.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          for (var e in pay) Text(e)
+                        ],
+                      )))),
         ],
-      )
+      )),
+      const SizedBox(
+        height: 5.0,
+      ),
     ]);
   }
 
@@ -135,18 +157,19 @@ class _BuyOverState extends State<BuyOverTab> {
 
     var receive = [];
     for (var paid in receiveFrom) {
-      receive.add(RichText(
-          text: TextSpan(
-        text: "RM ${(splitAmount - paid['paid']).toStringAsFixed(2)}",
-        style: const TextStyle(fontWeight: FontWeight.bold),
-        children: [
-          const TextSpan(text: 'from'),
-          TextSpan(text: "${paid['name']}"),
-        ],
-      )));
+      //   receive.add(RichText(
+      //       text: TextSpan(
+      //     text: "RM ${(splitAmount - paid['paid']).toStringAsFixed(2)}",
+      //     style: const TextStyle(fontWeight: FontWeight.bold),
+      //     children: [
+      //       const TextSpan(text: 'from'),
+      //       TextSpan(text: "${paid['name']}"),
+      //     ],
+      //   )));
+      // }
+      receive.add(
+          'RM ${(splitAmount - paid['paid']).toStringAsFixed(2)} from ${paid['name']}');
     }
-    // 'RM ${(splitAmount - paid['paid']).toStringAsFixed(2)} from ${paid['name']}');
-    // }
 
     // the buyover checking who to pay/receive from
     int numOfOthers = numOfPeople - widget.payees.length;
@@ -198,7 +221,7 @@ class _BuyOverState extends State<BuyOverTab> {
           if (buyOverIndex != null && splitAmount != null)
             Expanded(
                 child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     // crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                   ...buildBuyOverSections(),
